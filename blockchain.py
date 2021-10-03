@@ -60,7 +60,7 @@ class Block:
 
 class Blockchain:
     def __init__(self, difficulty):
-        self.__chain = [Block([Transaction('Dani', 100)])]
+        self.__chain = [Block([Transaction('Origin', 0)])]
         self.__DIFFICULTY = difficulty
         if self.__chain[0].getPrevHash() == '0'*64:
             self.__chain[0].mineBlock(self.__DIFFICULTY)
@@ -89,6 +89,14 @@ class Blockchain:
             if current_block.getHash() != current_block.createHash():
                 return False, index
         return True, None
+
+    def getBalance(self, user):
+        balance = 0
+        for block in self.__chain:
+            for transaction in block.getData():
+                if transaction.getUser() == user:
+                    balance += transaction.getValue()
+        return balance
 
 
 class Transaction:
@@ -123,6 +131,9 @@ class User:
         print(f"UserID: {self.__userID}")
         print('*' * 72)
 
+    def getUserID(self):
+        return self.__userID
+
     def __str__(self):
         return self.__userID
 
@@ -133,9 +144,10 @@ if __name__ == '__main__':
         i.showUser()
 
     BroCoin = Blockchain(difficulty=4)
-    BroCoin.addBlock(Block([Transaction(users[0], 100), Transaction(users[1], -100)]))
-    BroCoin.addBlock(Block([Transaction(users[0], 40), Transaction(users[1], -40)]))
-    BroCoin.addBlock(Block([Transaction(users[0], -140), Transaction(users[1], 140)]))
+    BroCoin.addBlock(Block([Transaction(users[0].getUserID(), 1200), Transaction(users[1].getUserID(), -1200)]))
+    BroCoin.addBlock(Block([Transaction(users[0].getUserID(), 40), Transaction(users[1].getUserID(), -40)]))
+    BroCoin.addBlock(Block([Transaction(users[0].getUserID(), -140), Transaction(users[1].getUserID(), 140)]))
     BroCoin.showChain()
     valid, error_index = BroCoin.integrityCheck()
     print(valid, error_index)
+    print(BroCoin.getBalance(users[0].getUserID()))
